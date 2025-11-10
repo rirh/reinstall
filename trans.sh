@@ -1651,7 +1651,7 @@ install_nixos() {
             sh=$sh_mirror/nix-$nix_ver/install
         else
             # 最新版 nix 在 nixos-install 时可能会出问题
-            # https://github.com/bin456789/reinstall/issues/451
+            # https://github.com/rirh/reinstall/issues/451
             if is_in_china; then
                 sh=https://mirror.nju.edu.cn/nix/latest/install
             else
@@ -7092,7 +7092,7 @@ trans() {
 
     # 先检查 modloop 是否正常
     # 防止格式化硬盘后，缺少 ext4 模块导致 mount 失败
-    # https://github.com/bin456789/reinstall/issues/136
+    # https://github.com/rirh/reinstall/issues/136
     ensure_service_started modloop
 
     cat /proc/cmdline
@@ -7249,7 +7249,7 @@ mount / -o remount,size=100%
 
 # 同步时间
 # 1. 可以防止访问 https 出错
-# 2. 可以防止 https://github.com/bin456789/reinstall/issues/223
+# 2. 可以防止 https://github.com/rirh/reinstall/issues/223
 #    E: Release file for http://security.ubuntu.com/ubuntu/dists/noble-security/InRelease is not valid yet (invalid for another 5h 37min 18s).
 #    Updates for this repository will not be applied.
 # 3. 不能直接读取 rtc，因为默认情况 windows rtc 是本地时间，linux rtc 是 utc 时间

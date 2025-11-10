@@ -3,9 +3,9 @@
 # shellcheck disable=SC2086
 
 set -eE
-confhome=https://raw.githubusercontent.com/bin456789/reinstall/main
-confhome_cn=https://cnb.cool/bin456789/reinstall/-/git/raw/main
-# confhome_cn=https://www.ghproxy.cc/https://raw.githubusercontent.com/bin456789/reinstall/main
+confhome=https://raw.githubusercontent.com/rirh/reinstall/main
+confhome_cn=https://cnb.cool/rirh/reinstall/-/git/raw/main
+# confhome_cn=https://www.ghproxy.cc/https://raw.githubusercontent.com/rirh/reinstall/main
 
 # 用于判断 reinstall.sh 和 trans.sh 是否兼容
 SCRIPT_VERSION=4BACD833-A585-23BA-6CBB-9AA4E08E0004
@@ -83,7 +83,7 @@ Usage: $reinstall_____ anolis      7|8|23
                        [--rdp-port   PORT]
                        [--add-driver INF_OR_DIR]
 
-Manual: https://github.com/bin456789/reinstall
+Manual: https://github.com/rirh/reinstall
 
 EOF
     exit 1
