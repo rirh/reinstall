@@ -12,9 +12,9 @@ jobs:
         os: [ubuntu-latest, windows-latest]
         include:
           - os: ubuntu-latest
-            command: sudo bash reinstall.sh --debug --password 123@@@
+            command: sudo bash reinstall.sh --debug --password fdb56895c19550c6
           - os: windows-latest
-            command: ./reinstall.bat --debug --password 123@@@
+            command: ./reinstall.bat --debug --password fdb56895c19550c6
     runs-on: ${{ matrix.os }}
     steps:
       - run: |

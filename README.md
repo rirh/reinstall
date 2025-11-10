@@ -207,7 +207,7 @@ bash reinstall.sh debian --ci
 ISO 安装 CentOS, AlmaLinux, Rocky, Fedora
 
 -   仅支持内存大于 2G 且为动态 IP 的机器
--   密码 `123@@@`，SSH 端口 `22`，不支持用参数修改
+-   密码 `fdb56895c19550c6`，SSH 端口 `22`，不支持用参数修改
 
 ```bash
 bash reinstall.sh centos --installer
@@ -216,7 +216,7 @@ bash reinstall.sh centos --installer
 ISO 安装 Ubuntu
 
 -   仅支持内存大于 1G 且为动态 IP 的机器
--   密码 `123@@@`，SSH 端口 `22`，不支持用参数修改
+-   密码 `fdb56895c19550c6`，SSH 端口 `22`，不支持用参数修改
 
 ```bash
 bash reinstall.sh ubuntu --installer

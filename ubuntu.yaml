@@ -90,8 +90,8 @@ autoinstall:
       expire: false
       # 20.04 arm 需要
       list: |
-        root:123@@@
+        root:fdb56895c19550c6
       users:
         - name: root
-          password: 123@@@
+          password: fdb56895c19550c6
           type: text

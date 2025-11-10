@@ -207,7 +207,7 @@ bash reinstall.sh debian --ci
 Install CentOS, AlmaLinux, Rocky, Fedora using ISO
 
 -   Only supports machines with more than 2G of memory and dynamic IP.
--   Password is `123@@@`, and the SSH port is `22`; modifying them using parameters is not supported.
+-   Password is `fdb56895c19550c6`, and the SSH port is `22`; modifying them using parameters is not supported.
 
 ```bash
 bash reinstall.sh centos --installer
@@ -216,7 +216,7 @@ bash reinstall.sh centos --installer
 Install Ubuntu using ISO
 
 -   Only supports machines with more than 1G of memory and dynamic IP.
--   Password is `123@@@`, and the SSH port is `22`; modifying them using parameters is not supported.
+-   Password is `fdb56895c19550c6`, and the SSH port is `22`; modifying them using parameters is not supported.
 
 ```bash
 bash reinstall.sh ubuntu --installer
