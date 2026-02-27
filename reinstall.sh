@@ -32,7 +32,9 @@ trap_err() {
     ret_no=$2
 
     error "Line $line_no return $ret_no"
-    sed -n "$line_no"p "$THIS_SCRIPT"
+    if [ -r "$THIS_SCRIPT" ]; then
+        sed -n "$line_no"p "$THIS_SCRIPT" >&2
+    fi
 }
 
 if ! { [ -n "$BASH" ] && [ -n "$BASH_VERSION" ]; }; then
@@ -2729,14 +2731,54 @@ get_maybe_efi_dirs_in_linux() {
     mount | awk '$5=="vfat" || $5=="autofs" {print $3}' | grep -E '/boot|/efi' | sort -u
 }
 
+resolve_efi_part_by_part() {
+    dev_part=$1
+    dev_part=$(readlink -f "$dev_part")
+
+    # 某些独服把 ESP 放在 md 设备上，efibootmgr 仍需使用底层物理分区。
+    if [ -n "$dev_part" ] && [ -e "$dev_part" ]; then
+        dev_name=$(basename "$dev_part")
+        if [ -d "/sys/class/block/$dev_name/slaves" ]; then
+            for slave in /sys/class/block/$dev_name/slaves/*; do
+                [ -e "$slave" ] || continue
+                slave_name=$(basename "$slave")
+                if grep -qE '[0-9]+$' <<<"$slave_name"; then
+                    echo "/dev/$slave_name"
+                    return
+                fi
+            done
+        fi
+    fi
+
+    echo "$dev_part"
+}
+
 get_disk_by_part() {
     dev_part=$1
     install_pkg lsblk >&2
-    lsblk -rn --inverse "$dev_part" | grep -w disk | awk '{print $1}'
+    dev_part=$(resolve_efi_part_by_part "$dev_part")
+    dev_name=$(basename "$dev_part")
+
+    # lsblk --inverse 在 md 场景可能拿不到 disk，先尝试 PKNAME。
+    disk=$(lsblk -rn -o PKNAME "$dev_part" 2>/dev/null | head -1)
+    if [ -n "$disk" ] && [ "$disk" != "$dev_name" ]; then
+        echo "$disk"
+        return
+    fi
+
+    lsblk -rn --inverse "$dev_part" | grep -w disk | awk '{print $1}' | head -1
 }
 
 get_part_num_by_part() {
     dev_part=$1
+    dev_part=$(resolve_efi_part_by_part "$dev_part")
+
+    part_num=$(lsblk -rn -o PARTN "$dev_part" 2>/dev/null | head -1)
+    if [ -n "$part_num" ]; then
+        echo "$part_num"
+        return
+    fi
+
     grep -oE '[0-9]*$' <<<"$dev_part"
 }
 
@@ -2790,13 +2832,36 @@ add_efi_entry_in_linux() {
                 dev_part=$(findmnt -T "$dist_dir" -no SOURCE | grep '^/dev/')
             fi
 
-            id=$(efibootmgr --create-only \
-                --disk "/dev/$(get_disk_by_part $dev_part)" \
-                --part "$(get_part_num_by_part $dev_part)" \
+            disk=$(get_disk_by_part "$dev_part")
+            part_num=$(get_part_num_by_part "$dev_part")
+            if [ -z "$disk" ] || [ -z "$part_num" ]; then
+                warn false "Could not detect efi disk/part from: $dev_part"
+                continue
+            fi
+
+            if ! efi_output=$(efibootmgr --create-only \
+                --disk "/dev/$disk" \
+                --part "$part_num" \
                 --label "$(get_entry_name)" \
-                --loader "\\EFI\\reinstall\\$basename" |
-                grep_efi_entry | tail -1 | grep_efi_index)
-            efibootmgr --bootnext $id
+                --loader "\\EFI\\reinstall\\$basename" 2>&1); then
+                warn false "efibootmgr --create-only failed:"
+                echo "$efi_output" >&2
+                continue
+            fi
+
+            entry_name=$(get_entry_name)
+            id=$(echo "$efi_output" | grep_efi_entry | grep -F "$entry_name" | tail -1 | grep_efi_index)
+            if ! grep -Eq '^[0-9a-fA-F]{4}$' <<<"$id"; then
+                # 一些固件输出格式特殊，改为二次读取 NVRAM 再解析。
+                id=$(efibootmgr | grep_efi_entry | grep -F "$entry_name" | tail -1 | grep_efi_index)
+            fi
+            if ! grep -Eq '^[0-9a-fA-F]{4}$' <<<"$id"; then
+                warn false "Could not parse boot id from efibootmgr output:"
+                echo "$efi_output" >&2
+                continue
+            fi
+
+            efibootmgr --bootnext "$id"
             return
         fi
     done
